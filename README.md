@@ -15,6 +15,7 @@ This guide provides the steps to set up, train, and deploy emotion detection mod
 
 - Get your `kaggle.json` key from [Kaggle](https://www.kaggle.com/).  
 - Upload it to your Colab environment.
+- Everything is there just incase its not :)
 
 ```python
 from google.colab import files
