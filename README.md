@@ -1,57 +1,56 @@
-Steps to Run the Model on Google Colab:
 
-Clone the Repository:
+# Emotion Detection Model Setup 🚀
 
-bash
-Copy
-Edit
+This guide provides the steps to set up, train, and deploy emotion detection models using Google Colab and VS Code.
+
+## 📁 Setup in Google Colab
+
+### 1. Clone the Repository
+
+```bash
 !git clone https://github.com/maelfabien/Multimodal-Emotion-Recognition.git
-Upload Kaggle API Key:
+```
 
-Go to Kaggle.
+### 2. Upload Kaggle API Key
 
-Get your kaggle.json key from My Account.
+- Get your `kaggle.json` key from [Kaggle](https://www.kaggle.com/).  
+- Upload it to your Colab environment.
 
-Upload it to your Colab environment.
-
-python
-Copy
-Edit
+```python
 from google.colab import files
 uploaded = files.upload()  # Upload your kaggle.json file
 !mkdir -p ~/.kaggle
 !cp kaggle.json ~/.kaggle/
 !chmod 600 ~/.kaggle/kaggle.json
 !pip install -q kaggle
-Download Required Datasets:
+```
 
-bash
-Copy
-Edit
+### 3. Download Required Datasets
+
+```bash
 !kaggle datasets download -d msambare/fer2013
 !unzip fer2013.zip -d fer2013
 
 !kaggle datasets download -d davilsena/ckdataset
 !unzip ckdataset.zip -d CK+
-Run the Training Script:
+```
 
-bash
-Copy
-Edit
+### 4. Run the Training Script
+
+```bash
 !python3 final.py
-Download the Trained Models to Your Computer:
+```
 
-After training, download the .pth model files to your local machine.
+## 💻 Move to VS Code
 
-Move to VS Code:
+Once the models are downloaded, move to VS Code and run:
 
-Once the models are downloaded, move to VS Code.
-
-Run:
-
-bash
-Copy
-Edit
+```bash
 python3 app.py
-Update the routes in app.py as needed.
+```
 
+- Make sure to adjust the routes in `app.py` if needed.
+
+---
+
+🎉 That's it! You’re all set to start detecting emotions with your custom-trained models! 😎
