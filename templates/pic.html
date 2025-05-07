@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Emotion Detector</title>
+    <style>
+        body { font-family: Arial; padding: 20px; }
+        button { margin-top: 10px; padding: 10px 20px; }
+        #preview, #video { margin-top: 10px; max-height: 300px; }
+        #result { margin-top: 20px; font-size: 20px; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>Emotion Detector</h1>
+
+    <h3>Select Mode:</h3>
+    <button onclick="toggleMode('upload')">Upload Image</button>
+    <!-- <button onclick="toggleMode('live')">Use Webcam</button> -->
+
+    <div id="uploadSection" style="display:none;">
+        <h3>Upload an Image</h3>
+        <input type="file" id="imageInput" accept="image/*"><br><br>
+        <img id="preview" src="#" alt="Image preview" style="display:none;" /><br>
+        <button onclick="sendImage()">Detect Emotion</button>
+    </div>
+
+    <div id="liveSection" style="display:none;">
+        <h3>Live Webcam</h3>
+        <video id="video" width="400" autoplay></video><br>
+        <button onclick="captureFrame()">Detect Emotion</button>
+    </div>
+
+    <div id="result"></div>
+
+    <script>
+        const preview = document.getElementById("preview");
+        const resultDiv = document.getElementById("result");
+        const video = document.getElementById("video");
+
+        function toggleMode(mode) {
+            document.getElementById("uploadSection").style.display = mode === 'upload' ? "block" : "none";
+            document.getElementById("liveSection").style.display = mode === 'live' ? "block" : "none";
+            resultDiv.innerText = "";
+
+            if (mode === 'live') {
+                navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
+                    video.srcObject = stream;
+                    video.onloadedmetadata = () => {
+                        video.play();
+                    };
+                }).catch(err => {
+                    alert("Webcam access denied.");
+                    console.error(err);
+                });
+            }
+        }
+
+        function sendImage() {
+            const file = document.getElementById("imageInput").files[0];
+            if (!file) {
+                alert("Please select an image.");
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onloadend = function () {
+                const base64 = reader.result.split(',')[1];
+                detectEmotion(base64);
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function captureFrame() {
+            const canvas = document.createElement("canvas");
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            canvas.getContext("2d").drawImage(video, 0, 0);
+            const base64 = canvas.toDataURL("image/jpeg").split(',')[1];
+            detectEmotion(base64);
+        }
+
+        function detectEmotion(base64Image) {
+            fetch("/predict", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ image: base64Image })
+            })
+            .then(res => res.json())
+            .then(data => {
+                resultDiv.innerText = "Emotion: " + data.emotion;
+            })
+            .catch(err => {
+                resultDiv.innerText = "Error detecting emotion.";
+                console.error(err);
+            });
+        }
+
+        // Show preview of uploaded image
+        document.getElementById("imageInput").onchange = function () {
+            const file = this.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                preview.src = e.target.result;
+                preview.style.display = "block";
+            };
+            reader.readAsDataURL(file);
+        };
+    </script>
+</body>
+</html>

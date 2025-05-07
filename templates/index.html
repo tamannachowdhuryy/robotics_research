@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Emotion Detection</title>
+</head>
+<body>
+    <h1>Emotion Detection</h1>
+    <video id="video" width="640" height="480" autoplay></video>
+    <p>Prediction: <span id="emotion">Waiting...</span></p>
+
+    <script>
+        const video = document.getElementById('video');
+        const emotionText = document.getElementById('emotion');
+        const canvas = document.createElement('canvas');
+
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => {
+                video.srcObject = stream;
+            });
+
+        setInterval(() => {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            canvas.getContext('2d').drawImage(video, 0, 0);
+
+            canvas.toBlob(blob => {
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    const base64data = reader.result.split(',')[1];
+                    fetch('/predict', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ image: base64data })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.emotion) {
+                            emotionText.textContent = data.emotion;
+                        } else {
+                            emotionText.textContent = "Error: " + (data.error || "Unknown");
+                        }
+                    });
+                };
+                reader.readAsDataURL(blob);
+            }, 'image/jpeg');
+        }, 3000);
+    </script>
+</body>
+</html>
+
